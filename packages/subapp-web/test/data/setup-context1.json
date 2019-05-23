@@ -18,7 +18,7 @@
         ],
         "byChunkName": {
           "main": "main.bundle.js",
-          "vendors-123": "vendors-123.js",
+          "vendors-123": ["vendors-123.js", "123.vendors.js"],
           "vendors-abc": "vendors-abc.js"
         }
       }
