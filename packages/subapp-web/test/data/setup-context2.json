@@ -1,0 +1,23 @@
+{
+  "routeOptions": {
+    "__internals": {
+      "assets": {
+        "js": [
+          {
+            "name": "main.bundle.js",
+            "chunkNames": ["main"]
+          },
+          {
+            "name": "vendors-123.js",
+            "chunkNames": ["vendors-123"]
+          },
+          {
+            "name": "vendors-abc.js",
+            "chunkNames": ["vendors-abc"]
+          }
+        ],
+        "byChunkName": {}
+      }
+    }
+  }
+}
