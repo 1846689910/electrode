@@ -1,0 +1,29 @@
+{
+  "routeOptions": {
+    "__internals": {
+      "assets": {
+        "js": [
+          {
+            "name": "main.bundle.js",
+            "chunkNames": ["main"]
+          },
+          {
+            "name": "subapp1.bundle.js",
+            "chunkNames": ["subapp1"]
+          },
+          {
+            "name": "subapp2.bundle.js",
+            "chunkNames": ["subapp2"]
+          }
+        ],
+        "byChunkName": {
+          "main": "main.bundle.js",
+          "subapp1": ["subapp1.bundle.js", "123.subapp1.js"],
+          "subapp2": ["subapp2.bundle.js"]
+        }
+      }
+    },
+    "devBundleBase": "/",
+    "prodBundleBase": "/js/"
+  }
+}

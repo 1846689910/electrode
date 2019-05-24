@@ -43,7 +43,7 @@ module.exports = function setup(setupContext, token) {
 
   const retrieveDevServerBundle = async () => {
     return new Promise((resolve, reject) => {
-      request(`${bundleBase}${bundleJs}`, (err, resp, body) => {
+      request.get(`${bundleBase}${bundleJs}`, (err, resp, body) => {
         if (err) {
           reject(err);
         } else {
