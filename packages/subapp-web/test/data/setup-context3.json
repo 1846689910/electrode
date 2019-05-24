@@ -14,12 +14,17 @@
           {
             "name": "subapp2.bundle.js",
             "chunkNames": ["subapp2"]
+          },
+          {
+            "name": "subapp3.bundle.js",
+            "chunkNames": ["subapp3"]
           }
         ],
         "byChunkName": {
           "main": "main.bundle.js",
           "subapp1": ["subapp1.bundle.js", "123.subapp1.js"],
-          "subapp2": ["subapp2.bundle.js"]
+          "subapp2": ["subapp2.bundle.js"],
+          "subapp3": ["subapp3.bundle.js"]
         }
       }
     },

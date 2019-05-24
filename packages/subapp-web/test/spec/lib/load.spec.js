@@ -5,11 +5,13 @@ const sinon = require("sinon");
 const Path = require("path");
 const conf1 = require("../../data/subapp1/src/subapp-conf");
 const conf2 = require("../../data/subapp2/src/subapp-conf");
+const conf3 = require("../../data/subapp3/src/subapp-conf");
 
 describe("setup", () => {
   process.env.APP_SRC_DIR = "test/data";
   const path = Path.resolve("dist/js/subapp1.bundle.js");
   const path2 = Path.resolve("dist/js/subapp2.bundle.js");
+  const path3 = Path.resolve("dist/js/subapp3.bundle.js");
   const SUBAPP_CONTAINER_SYM = Symbol.for("Electrode SubApps Container");
   const context = {
     user: {
@@ -52,6 +54,7 @@ describe("setup", () => {
         ...conf
       }
     };
+    console.log(JSON.stringify({ ...basicConf, ...conf }));
   };
 
   let stubFsReadFileSync;
@@ -61,6 +64,7 @@ describe("setup", () => {
     stubFsReadFileSync = sinon.stub(Fs, "readFileSync");
     Fs.readFileSync.withArgs(path).callsFake(() => "var vendors = 123");
     Fs.readFileSync.withArgs(path2).callsFake(() => "var vendors = 123");
+    Fs.readFileSync.withArgs(path3).callsFake(() => "var vendors = 123");
     stubFsReadFileSync.callThrough();
 
     stubRequest = sinon.stub(require("request"), "get");
@@ -81,6 +85,14 @@ describe("setup", () => {
     stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
     setSubApp("subapp1", conf1, { useReactRouter: true, reduxCreateStore: true });
     const init = setup(setupContext3, getToken({ elementId: "123" }));
+    init.process(context);
+    expect(init).to.exist;
+  });
+
+  it("should load subapp if function prepare is not defined in subapp server", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
+    setSubApp("subapp3", conf3, { useReactRouter: true, reduxCreateStore: true });
+    const init = setup(setupContext3, getToken({ elementId: "123", name: "subapp3" }));
     init.process(context);
     expect(init).to.exist;
   });
@@ -147,14 +159,14 @@ describe("setup", () => {
   it("should load subapp with reduxCreateStore", () => {
     stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
     setSubApp("subapp1", conf1, { reduxCreateStore: true });
-    const init = setup(setupContext3, getToken({ inlineScript: false }));
+    const init = setup(setupContext3, getToken({ inlineScript: false, serverSideRendering: {} }));
     init.process(context);
     expect(init).to.exist;
   });
 
   it("should load subapp without timestamp setup", () => {
     stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
-    const init = setup(setupContext3, getToken({ timestamp: null }));
+    const init = setup(setupContext3, getToken({ timestamp: null, serverSideRendering: {} }));
     const context1 = { ...context };
     delete context1.user.request.app.webpackDev;
     init.process(context1);
