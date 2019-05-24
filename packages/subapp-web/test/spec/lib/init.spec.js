@@ -1,9 +1,9 @@
-const init = require("../../lib/init");
+const init = require("../../../lib/init");
 const Fs = require("fs");
 const Path = require("path");
 const sinon = require("sinon");
-const setupContext1 = require("../data/setup-context1.json");
-const setupContext2 = require("../data/setup-context2.json");
+const setupContext1 = require("../../data/setup-context1.json");
+const setupContext2 = require("../../data/setup-context2.json");
 
 describe("init", () => {
   it("should generate initial scripts for web page", () => {

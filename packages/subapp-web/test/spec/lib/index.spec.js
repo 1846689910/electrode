@@ -1,6 +1,6 @@
 "use strict";
 
-const subAppWeb = require("../..");
+const subAppWeb = require("../../..");
 
 describe("subapp-web", function() {
   it("should export module", () => {

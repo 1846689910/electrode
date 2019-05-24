@@ -1,5 +1,5 @@
-const { getVendorBundles, getSubAppBundle, getBundleBase } = require("../../lib/util");
-const setupContext1 = require("../data/setup-context1.json");
+const { getVendorBundles, getSubAppBundle, getBundleBase } = require("../../../lib/util");
+const setupContext1 = require("../../data/setup-context1.json");
 
 describe("util", () => {
   describe("getVendorBundles", () => {

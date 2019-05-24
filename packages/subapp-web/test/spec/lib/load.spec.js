@@ -1,10 +1,10 @@
-const setup = require("../../lib/load");
-const setupContext3 = require("../data/setup-context3.json");
+const setup = require("../../../lib/load");
+const setupContext3 = require("../../data/setup-context3.json");
 const Fs = require("fs");
 const sinon = require("sinon");
 const Path = require("path");
-const conf1 = require("../data/subapp1/src/subapp-conf");
-const conf2 = require("../data/subapp2/src/subapp-conf");
+const conf1 = require("../../data/subapp1/src/subapp-conf");
+const conf2 = require("../../data/subapp2/src/subapp-conf");
 
 describe("setup", () => {
   process.env.APP_SRC_DIR = "test/data";
@@ -64,11 +64,6 @@ describe("setup", () => {
     stubFsReadFileSync.callThrough();
 
     stubRequest = sinon.stub(require("request"), "get");
-    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
-    stubRequest.onCall(1).yields(new Error());
-    stubRequest.onCall(2).yields(null, {}, JSON.stringify({ data: "abc" }));
-
-    stubReactCreateElement = sinon.stub(require("react"), "createElement").onCall(0).throws();
   });
 
   afterEach(() => {
@@ -83,45 +78,91 @@ describe("setup", () => {
   });
 
   it("should load subapp", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
     setSubApp("subapp1", conf1, { useReactRouter: true, reduxCreateStore: true });
-    let init = setup(setupContext3, getToken({ elementId: "123" }));
+    const init = setup(setupContext3, getToken({ elementId: "123" }));
     init.process(context);
     expect(init).to.exist;
+  });
 
+  it("should load subapp with WEBPACK_DEV = false", () => {
     process.env.WEBPACK_DEV = "false";
-    init = setup(setupContext3, getToken({ streaming: false }));
+    const init = setup(setupContext3, getToken({ streaming: false }));
     init.process(context);
     process.env.WEBPACK_DEV = "true";
+    expect(init).to.exist;
+  });
 
+  it("should load subapp with WEBPACK_DEV = false", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
+    stubReactCreateElement = sinon
+      .stub(require("react"), "createElement")
+      .onCall(0)
+      .throws();
+    process.env.WEBPACK_DEV = "false";
+    const init = setup(setupContext3, getToken({ streaming: false }));
+    init.process(context);
+    process.env.WEBPACK_DEV = "true";
+    expect(init).to.exist;
+  });
+
+  it("should load subapp in production mode", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
     process.env.WEBPACK_DEV = "false";
     process.env.NODE_ENV = "production";
-    init = setup(setupContext3, getToken({ streaming: false, inlineScript: true, async: false, defer: true, timestamp: null }));
+    const init = setup(
+      setupContext3,
+      getToken({ streaming: false, inlineScript: true, async: false, defer: true, timestamp: null })
+    );
     init.process(context);
     process.env.WEBPACK_DEV = "true";
     delete process.env.NODE_ENV;
+    expect(init).to.exist;
+  });
 
-    init = setup(setupContext3, getToken({ hydrateServerData: false }));
+  it("should load subapp without hydrateServerData", () => {
+    stubRequest.onCall(0).yields(new Error());
+    const init = setup(setupContext3, getToken({ hydrateServerData: false }));
     init.process(context);
+    expect(init).to.exist;
+  });
 
-    init = setup(setupContext3, getToken({ streaming: false, hydrateServerData: false }));
+  it("should load subapp without streaming", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
+    const init = setup(setupContext3, getToken({ streaming: false, hydrateServerData: false }));
     init.process(context);
+    expect(init).to.exist;
+  });
 
-    init = setup(setupContext3, getToken({ hydrateServerData: false, serverSideRendering: false }));
+  it("should load subapp without serversiderendering", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
+    const init = setup(
+      setupContext3,
+      getToken({ hydrateServerData: false, serverSideRendering: false })
+    );
     init.process(context);
+    expect(init).to.exist;
+  });
 
+  it("should load subapp with reduxCreateStore", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
     setSubApp("subapp1", conf1, { reduxCreateStore: true });
-    init = setup(setupContext3, getToken({ inlineScript: false }));
+    const init = setup(setupContext3, getToken({ inlineScript: false }));
     init.process(context);
+    expect(init).to.exist;
+  });
 
-    init = setup(setupContext3, getToken({ timestamp: null }));
+  it("should load subapp without timestamp setup", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
+    const init = setup(setupContext3, getToken({ timestamp: null }));
     const context1 = { ...context };
     delete context1.user.request.app.webpackDev;
     init.process(context1);
-
     expect(init).to.exist;
   });
 
   it("should load subapp if it cannot request assets", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
     process.env.WEBPACK_DEV = "false";
     const init = setup(setupContext3, getToken());
     init.process(context);
@@ -130,13 +171,20 @@ describe("setup", () => {
   });
 
   it("should load subapp if subapp server does not have StartComponent", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
+
     setSubApp("subapp2", conf2, { useReactRouter: true, reduxCreateStore: true });
-    const init = setup(setupContext3, getToken({ name: "subapp2", elementId: "123", hydrateServerData: false }));
+    const init = setup(
+      setupContext3,
+      getToken({ name: "subapp2", elementId: "123", hydrateServerData: false })
+    );
     init.process(context);
     expect(init).to.exist;
   });
 
   it("should load subapp if CreateElement throws", () => {
+    stubRequest.onCall(0).yields(null, {}, JSON.stringify({ data: "abc" }));
+
     process.env.WEBPACK_DEV = "false";
     setSubApp("subapp1", conf1, { Component: null });
     const init = setup(setupContext3, getToken());

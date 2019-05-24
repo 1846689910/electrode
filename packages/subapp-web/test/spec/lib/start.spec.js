@@ -1,4 +1,4 @@
-const setup = require("../../lib/start");
+const setup = require("../../../lib/start");
 
 describe("start", () => {
   it("should return the subapp start", () => {
