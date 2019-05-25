@@ -24,6 +24,8 @@
     "dist"
   ],
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/register": "^7.4.4",
     "history": "^4.7.2",
     "little-loader": "^0.2.0",
     "lodash": "^4.17.10",
