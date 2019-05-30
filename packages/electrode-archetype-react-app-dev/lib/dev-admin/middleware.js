@@ -26,6 +26,9 @@ const archetype = require("electrode-archetype-react-app/config/archetype");
 const _ = require("lodash");
 const statsUtils = require("../stats-utils");
 const statsMapper = require("../stats-mapper");
+const devRequire = archetype.devRequire;
+const xsh = devRequire("xsh");
+const shell = xsh.$;
 
 function urlJoin() {
   if (arguments.length < 1) return undefined;
@@ -183,7 +186,9 @@ class Middleware {
     this.publicPath = webpackDevOptions.publicPath || "/";
     this.listAssetPath = urlJoin(this.publicPath, "/");
 
-    this.cwdMemIndex = serveIndex(process.cwd(), {
+    // webpack dev middleware's memfs root is where the actual output from webpack
+    this.memFsCwd = this.devMiddleware.fileSystem.existsSync(process.cwd()) ? process.cwd() : "/";
+    this.cwdMemIndex = serveIndex(this.memFsCwd, {
       icons: true,
       hidden: true,
       fs: this.devMiddleware.fileSystem
@@ -197,6 +202,7 @@ class Middleware {
     this.dllDevUrl = urlJoin(this.devBaseUrl, "/dll");
 
     const ISO_LOADER_CONFIG = ".isomorphic-loader-config.json";
+    const LOADABLE_STATS = "loadable-stats.json";
     const isoLockfile = Path.resolve(`${ISO_LOADER_CONFIG}.lock`);
     const isoConfigFile = Path.resolve(ISO_LOADER_CONFIG);
 
@@ -212,15 +218,23 @@ class Middleware {
       }
     };
 
-    const transferIsomorphicAssets = (fileSystem, cb) => {
+    const transferMemFsFiles = (fileSystem, cb) => {
       const isoConfig = loadIsomorphicConfig();
+      const loadableStats = Path.join(this.memFsCwd, `server/${LOADABLE_STATS}`);
+      if (fileSystem.existsSync(loadableStats)) {
+        const source = fileSystem.readFileSync(loadableStats);
+        const dir = Path.resolve("./dist/server");
+        if (!Fs.existsSync(dir)) shell.mkdir("-p", dir);
+        Fs.writeFileSync(Path.join(dir, LOADABLE_STATS), source);
+      }
+
       if (isoConfig.assetsFile) {
         const assetsFile = Path.resolve(isoConfig.assetsFile);
         const source = fileSystem.readFileSync(assetsFile);
-        Fs.writeFile(assetsFile, source, cb);
-      } else {
-        process.nextTick(() => cb(true));
+        Fs.writeFileSync(assetsFile, source);
       }
+
+      process.nextTick(() => cb(true));
     };
 
     this.webpackDev = {
@@ -290,7 +304,7 @@ class Middleware {
           });
         };
 
-        waitIsoLock(() => transferIsomorphicAssets(this.devMiddleware.fileSystem, update));
+        waitIsoLock(() => transferMemFsFiles(this.devMiddleware.fileSystem, update));
       } else {
         process.send({
           name: "webpack-report",
@@ -322,10 +336,10 @@ doReload(1); </script></body></html>`)
       );
     }
 
-    const serveStatic = (baseUrl, fileSystem, indexServer) => {
+    const serveStatic = (baseUrl, fileSystem, indexServer, cwd) => {
       req.originalUrl = req.url; // this is what express saves to, else serve-index nukes
       req.url = req.url.substr(baseUrl.length) || "/";
-      const fullPath = Path.join(process.cwd(), req.url);
+      const fullPath = Path.join(cwd || process.cwd(), req.url);
 
       return new Promise((resolve, reject) => {
         fileSystem.stat(fullPath, (err, stats) => {
@@ -407,7 +421,8 @@ ${listDirectoryHtml(this.listAssetPath, outputPath)}
       return serveStatic(
         this.cwdContextBaseUrl,
         this.devMiddleware.fileSystem,
-        this.cwdMemIndex
+        this.cwdMemIndex,
+        this.memFsCwd
       ).catch(err => sendStaticServeError("reading webpack mem fs", err));
     } else if (req.url.startsWith(this.reporterUrl) || this.returnReporter) {
       return serveReporter(this.webpackDev.lastReporterOptions);
