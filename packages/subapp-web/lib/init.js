@@ -54,7 +54,7 @@ ${clientJs}
 ${vendorBundleLoadJs}
 </script>
 `;
-
+  console.log(subappUtil.getAllSubAppManifest()); // eslint-disable-line no-console
   const subAppServers = Object.keys(subappUtil.getAllSubAppManifest())
     .map(name => subappUtil.loadSubAppServerByName(name))
     .filter(x => x && x.initialize);

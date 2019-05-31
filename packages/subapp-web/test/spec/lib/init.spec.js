@@ -4,6 +4,7 @@ const Path = require("path");
 const sinon = require("sinon");
 const setupContext1 = require("../../data/setup-context1.json");
 const setupContext2 = require("../../data/setup-context2.json");
+const subappUtil = require("subapp-util");
 
 describe("init", () => {
   afterEach(() => {
@@ -14,10 +15,10 @@ describe("init", () => {
   });
   it("should generate initial scripts for web page", () => {
     const stubManifest = sinon
-      .stub(require("subapp-util"), "getAllSubAppManifest")
+      .stub(subappUtil, "getAllSubAppManifest")
       .callsFake(() => ({ server1: {}, server2: {} }));
     const stubLoad = sinon
-      .stub(require("subapp-util"), "loadSubAppServerByName")
+      .stub(subappUtil, "loadSubAppServerByName")
       .callsFake(name => ({ name, initialize: () => {} }));
     this.stubPathJoin = sinon
       .stub(Path, "join")
