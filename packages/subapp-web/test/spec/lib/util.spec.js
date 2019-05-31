@@ -1,5 +1,11 @@
-const { getVendorBundles, getSubAppBundle, getBundleBase } = require("../../../lib/util");
+const {
+  getVendorBundles,
+  getSubAppBundle,
+  getBundleBase,
+  mapCdnAssets
+} = require("../../../lib/util");
 const setupContext1 = require("../../data/setup-context1.json");
+const cdnAssets = require("../../data/assets.json");
 
 describe("util", () => {
   describe("getVendorBundles", () => {
@@ -38,6 +44,42 @@ describe("util", () => {
       process.env.WEBPACK_DEV = "false";
       expect(getBundleBase(routeData)).to.equal(routeData.prodBundleBase);
       delete process.env.WEBPACK_DEV;
+    });
+  });
+
+  describe("mapCdnAssets", () => {
+    it("should map with cdn objects if assetsFile does not exists", () => {
+      const cdnBundles = mapCdnAssets({
+        bundle1: "bundle1.js"
+      });
+      expect(cdnBundles.bundle1).to.equal("bundle1.js");
+    });
+
+    it("should map with cdn objects", () => {
+      Object.keys(require.cache).forEach(key => delete require.cache[key]);
+      const { mapCdnAssets: mapFn } = require("../../../lib/util");
+      const cdnBundles = mapFn(
+        {
+          bundle1: "bundle1.js",
+          bundle2: "bundle2.js"
+        },
+        "",
+        "./test/data/assets.json"
+      );
+      expect(cdnBundles.bundle1).to.equal(
+        cdnAssets[Object.keys(cdnAssets).find(x => x.endsWith("bundle1.js"))]
+      );
+    });
+  });
+
+  describe("getCdnJsBundles", () => {
+    it("should get cdn js bundles", () => {
+      const routeData = setupContext1.routeOptions.__internals;
+      const cdnJsBundles = require("../../../lib/util").getCdnJsBundles(
+        routeData.assets.byChunkName,
+        setupContext1.routeOptions
+      );
+      expect(cdnJsBundles).to.have.all.keys("main", "vendors-123", "vendors-abc");
     });
   });
 });
