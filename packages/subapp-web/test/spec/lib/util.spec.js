@@ -24,6 +24,7 @@ describe("util", () => {
       prodBundleBase: "/js/"
     };
     it("should get devBundleBase", () => {
+      delete process.env.NODE_ENV;
       process.env.WEBPACK_DEV = "true";
       expect(getBundleBase(routeData)).to.equal(routeData.devBundleBase);
       delete process.env.WEBPACK_DEV;

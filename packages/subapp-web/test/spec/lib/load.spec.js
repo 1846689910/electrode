@@ -1,3 +1,4 @@
+Object.keys(require.cache).forEach(key => delete require.cache[key]);
 const setup = require("../../../lib/load");
 const setupContext3 = require("../../data/setup-context3.json");
 const Fs = require("fs");
