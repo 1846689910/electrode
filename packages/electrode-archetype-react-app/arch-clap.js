@@ -426,7 +426,12 @@ function makeTasks(xclap) {
       "build-dist:clean-tmp"
     ],
 
-    "mv-to-dist": ["mv-to-dist:clean", "mv-to-dist:mv-dirs", "mv-to-dist:keep-targets"],
+    "mv-to-dist": [
+      "mv-to-dist:clean",
+      "mv-to-dist:mv-dirs",
+      "mv-to-dist:keep-targets",
+      "mv-to-dist:mv-globalCss"
+    ],
     "build-dist-dev-static": {
       desc: false,
       task: mkCmd(
@@ -538,6 +543,15 @@ function makeTasks(xclap) {
           }
         });
         return;
+      }
+    },
+
+    "mv-to-dist:mv-globalCss": {
+      desc: "move defined globalCss to dist/js",
+      task: () => {
+        archetype.custom.globalCss.forEach(x => {
+          shell.cp("-r", Path.resolve("node_modules", x), Path.resolve("dist/js"));
+        });
       }
     },
 

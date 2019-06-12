@@ -144,6 +144,8 @@ const setupOptions = options => {
   const devProtocol = https ? "https://" : "http://";
   const devBundleBase = `${devProtocol}${pluginOptions.devServer.host}:\
 ${pluginOptions.devServer.port}/js/`;
+  const devCwd = `${devProtocol}${pluginOptions.devServer.host}:\
+${pluginOptions.devServer.port}/__electrode_dev/cwd/`;
   const statsPath = getStatsPath(pluginOptions.stats, pluginOptions.buildArtifacts);
 
   const assets = loadAssetsFromStats(statsPath);
@@ -152,7 +154,8 @@ ${pluginOptions.devServer.port}/js/`;
     assets,
     otherAssets,
     chunkSelector,
-    devBundleBase
+    devBundleBase,
+    devCwd
   });
 
   return pluginOptions;

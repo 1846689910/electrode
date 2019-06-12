@@ -7,6 +7,7 @@ const fs = require("fs");
 const Path = require("path");
 const requireAt = require("require-at");
 const assert = require("assert");
+const optionalRequire = require("optional-require")(require);
 
 /**
  * Tries to import bundle chunk selector function if the corresponding option is set in the
@@ -261,6 +262,11 @@ function getBundleJsNameByQuery(data, otherAssets) {
   return name;
 }
 
+function getGlobalCss() {
+  const config = optionalRequire(Path.resolve("archetype/config")) || {};
+  return _.get(config, "custom.globalCss", []);
+}
+
 const munchyHandleStreamError = err => {
   let errMsg = (process.env.NODE_ENV !== "production" && err.stack) || err.message;
 
@@ -298,5 +304,6 @@ module.exports = {
   getOtherAssets,
   getBundleJsNameByQuery,
   isReadableStream: x => Boolean(x && x.pipe && x.on && x._readableState),
-  munchyHandleStreamError
+  munchyHandleStreamError,
+  getGlobalCss
 };

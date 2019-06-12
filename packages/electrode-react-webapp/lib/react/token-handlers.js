@@ -3,6 +3,7 @@
 /* eslint-disable max-statements, max-depth */
 
 const groupScripts = require("../group-scripts");
+const Path = require("path");
 
 const {
   getIconStats,
@@ -13,7 +14,8 @@ const {
   processRenderSsMode,
   getCspNonce,
   getBundleJsNameByQuery,
-  isReadableStream
+  isReadableStream,
+  getGlobalCss
 } = require("../utils");
 
 const {
@@ -45,6 +47,7 @@ module.exports = function setup(handlerContext /*, asyncTemplate*/) {
   const assets = routeOptions.__internals.assets;
   const otherAssets = routeOptions.__internals.otherAssets;
   const devBundleBase = routeOptions.__internals.devBundleBase;
+  const devCwd = routeOptions.__internals.devCwd;
   const prodBundleBase = routeOptions.prodBundleBase;
   const chunkSelector = routeOptions.__internals.chunkSelector;
   const iconStats = getIconStats(routeOptions.iconStats);
@@ -163,8 +166,16 @@ window.${key}.ui = ${JSON.stringify(routeOptions.uiConfig)};
     [HEADER_BUNDLE_MARKER]: context => {
       const manifest = bundleManifest();
       const manifestLink = manifest ? `<link rel="manifest" href="${manifest}" />\n` : "";
-      const css = [].concat(WEBPACK_DEV ? context.user.devCSSBundle : context.user.cssChunk);
-
+      const globalCss = getGlobalCss();
+      const css = []
+        .concat(
+          WEBPACK_DEV
+            ? globalCss.map(x => `${devCwd}/node_modules/${x}`)
+            : globalCss.map(x => ({
+                name: Path.basename(x)
+              }))
+        )
+        .concat(WEBPACK_DEV ? context.user.devCSSBundle : context.user.cssChunk);
       const cssLink = css.reduce((acc, file) => {
         file = WEBPACK_DEV ? file : prodBundleBase + file.name;
         return `${acc}<link rel="stylesheet" href="${file}" />`;

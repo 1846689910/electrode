@@ -96,6 +96,10 @@ const topConfigSpec = {
   devOpenBrowser: { env: "ELECTRODE_DEV_OPEN_BROWSER", default: false }
 };
 
+const customConfigSpec = {
+  globalCss: { env: "CUSTOME_GLOBAL_CSS", type: "array", default: [] }
+};
+
 const config = {
   devDir,
   devPkg,
@@ -116,7 +120,8 @@ const config = {
       jest: `${configDir}/jest`
     },
     userConfig.configPaths
-  )
+  ),
+  custom: xenvConfig(customConfigSpec, userConfig.custom, { merge })
 };
 
 module.exports = Object.assign(
